@@ -54,9 +54,9 @@ function filterCsvFile(filePath) {
             if (!line.trim()) return;
             totalRecords++;
 
-            const fields = line.split('~');
-            const micr = (fields[1] || '').trim();
-            const ifsc = (fields[2] || '').trim();
+            const fields = line.split(',');
+            const micr = (fields[0] || '').trim();
+            const ifsc = (fields[1] || '').trim();
 
             if (/^.{9}$/.test(micr) && /^.{11}$/.test(ifsc)) {
                 correctRecords++;
@@ -92,15 +92,15 @@ function filterArrayData(records) {
     const validStream = fs.createWriteStream(validRecordsFile);
 
     records.forEach((row) => {
-        const micr = (row[1] || '').toString().trim();
-        const ifsc = (row[2] || '').toString().trim();
+        const micr = (row[0] || '').toString().trim();
+        const ifsc = (row[1] || '').toString().trim();
 
         if (/^.{9}$/.test(micr) && /^.{11}$/.test(ifsc)) {
             correctRecords++;
-            validStream.write(row.join('~') + '\n');
+            validStream.write(row.join(',') + '\n');
         } else {
             incorrectRecords++;
-            invalidStream.write(row.join('~') + '\n');
+            invalidStream.write(row.join(',') + '\n');
         }
     });
 
@@ -164,12 +164,39 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
         const ifscSet = new Set();
         const micrSet = new Set();
 
+        console.log(`\n=== BANK MAPPING DEBUG ===`);
+        console.log(`Total bank mapping records: ${bankMappingData.length}`);
+        
+        // Show first 3 records to verify format
+        if (bankMappingData.length > 0) {
+            console.log(`\nFirst 3 raw records after split:`);
+            for (let i = 0; i < Math.min(3, bankMappingData.length); i++) {
+                const row = bankMappingData[i];
+                console.log(`  Row ${i}: Fields=${row.length}, [0]="${row[0]}" [1]="${row[1]}" [2]="${row[2]}"`);
+            }
+        }
+
         bankMappingData.forEach(row => {
             const ifsc = (row[1] || '').toString().trim();
             const micr = (row[2] || '').toString().trim();
             if (ifsc.length === 11) ifscSet.add(ifsc);
             if (micr.length === 9) micrSet.add(micr);
         });
+        
+        console.log(`\nIFSC codes loaded: ${ifscSet.size}`);
+        console.log(`MICR codes loaded: ${micrSet.size}`);
+        if (ifscSet.size > 0) {
+            console.log(`Sample IFSC codes: ${Array.from(ifscSet).slice(0, 5).join(', ')}`);
+        }
+        if (micrSet.size > 0) {
+            console.log(`Sample MICR codes: ${Array.from(micrSet).slice(0, 5).join(', ')}`);
+        }
+        
+        // Check if specific test codes exist
+        console.log(`\nTest lookups:`);
+        console.log(`  Does SBIN0005076 exist? ${ifscSet.has('SBIN0005076')}`);
+        console.log(`  Does 400002001 exist? ${micrSet.has('400002001')}`);
+        console.log(`=========================\n`);
 
         let iM = 0,
             iU = 0,
@@ -181,10 +208,22 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
 
         const rl = readline.createInterface({ input: fs.createReadStream(validFile) });
 
+        let lineCount = 0;
         rl.on('line', line => {
-            const f = line.split('~');
-            const micr = (f[1] || '').trim();
-            const ifsc = (f[2] || '').trim();
+            lineCount++;
+            const f = line.split(',');
+            const micr = (f[0] || '').trim();
+            const ifsc = (f[1] || '').trim();
+            
+            // Debug first 3 records
+            if (lineCount <= 3) {
+                console.log(`\nValid record ${lineCount}:`);
+                console.log(`  Raw line: "${line}"`);
+                console.log(`  MICR=[0]: "${micr}" (length: ${micr.length})`);
+                console.log(`  IFSC=[1]: "${ifsc}" (length: ${ifsc.length})`);
+                console.log(`  IFSC exists in mapping: ${ifscSet.has(ifsc)}`);
+                console.log(`  MICR exists in mapping: ${micrSet.has(micr)}`);
+            }
 
             const ifscExists = ifscSet.has(ifsc);
             const micrExists = micrSet.has(micr);
@@ -272,9 +311,9 @@ function findFullyUnmatchedRecords(validRecordsFilePath, bankMappingData) {
         rl.on('line', (line) => {
             if (!line.trim()) return;
 
-            const fields = line.split('~');
-            const micr = (fields[1] || '').trim();
-            const ifsc = (fields[2] || '').trim();
+            const fields = line.split(',');
+            const micr = (fields[0] || '').trim();
+            const ifsc = (fields[1] || '').trim();
 
             const ifscExists = ifscSet.has(ifsc);
             const micrExists = micrSet.has(micr);
@@ -314,8 +353,8 @@ function findWorstIfscFailures(ifscUnmatchedFile, bothUnmatchedFile) {
 
         rlBoth.on('line', (line) => {
             if (!line.trim()) return;
-            const fields = line.split('~');
-            const ifsc = (fields[2] || '').trim();
+            const fields = line.split(',');
+            const ifsc = (fields[1] || '').trim();
             bothIfscSet.add(ifsc);
         });
 
@@ -331,8 +370,8 @@ function findWorstIfscFailures(ifscUnmatchedFile, bothUnmatchedFile) {
             rlIfsc.on('line', (line) => {
                 if (!line.trim()) return;
 
-                const fields = line.split('~');
-                const ifsc = (fields[2] || '').trim();
+                const fields = line.split(',');
+                const ifsc = (fields[1] || '').trim();
 
                 if (bothIfscSet.has(ifsc)) {
                     worstCount++;
@@ -371,8 +410,8 @@ function findIfscMissingButMicrPresent(ifscUnmatchedFile, bothMissingFile) {
 
         rlBoth.on('line', (line) => {
             if (!line.trim()) return;
-            const fields = line.split('~');
-            const ifsc = (fields[2] || '').trim();
+            const fields = line.split(',');
+            const ifsc = (fields[1] || '').trim();
             if (ifsc) bothMissingIfscSet.add(ifsc);
         });
 
@@ -389,8 +428,8 @@ function findIfscMissingButMicrPresent(ifscUnmatchedFile, bothMissingFile) {
             rlIfsc.on('line', (line) => {
                 if (!line.trim()) return;
 
-                const fields = line.split('~');
-                const ifsc = (fields[2] || '').trim();
+                const fields = line.split(',');
+                const ifsc = (fields[1] || '').trim();
 
                 // Not in both-missing → MICR exists
                 if (!bothMissingIfscSet.has(ifsc)) {
@@ -423,8 +462,8 @@ function sortByIfsc(inputFile, outputFile) {
 
         rl.on('line', (line) => {
             if (!line.trim()) return;
-            const fields = line.split('~');
-            const ifsc = (fields[2] || '').trim(); // IFSC is 3rd column
+            const fields = line.split(',');
+            const ifsc = (fields[1] || '').trim(); // IFSC is 2nd column (index 1)
             rows.push({ ifsc, line });
         });
 
