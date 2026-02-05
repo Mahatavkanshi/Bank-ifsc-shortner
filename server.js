@@ -74,7 +74,7 @@ const {
  */
 function cleanupOldBackups() {
     const backupDir = path.join(__dirname, 'backups');
-    
+
     if (!fs.existsSync(backupDir)) {
         return 0;
     }
@@ -102,7 +102,7 @@ function cleanupOldBackups() {
             // If backup is older than 1 week, delete all files with that timestamp
             if (age > oneWeekInMs) {
                 const filesToDelete = files.filter(f => f.includes(timestamp));
-                
+
                 filesToDelete.forEach(file => {
                     const filePath = path.join(backupDir, file);
                     try {
@@ -134,7 +134,7 @@ function cleanupOldBackups() {
  */
 function backupExistingFiles() {
     const backupDir = path.join(__dirname, 'backups');
-    
+
     // Create backups directory if it doesn't exist
     if (!fs.existsSync(backupDir)) {
         fs.mkdirSync(backupDir, { recursive: true });
@@ -167,14 +167,14 @@ function backupExistingFiles() {
 
     filesToBackup.forEach(filename => {
         const sourcePath = path.join(__dirname, filename);
-        
+
         // Only backup if file exists and has content
         if (fs.existsSync(sourcePath)) {
             const stats = fs.statSync(sourcePath);
             if (stats.size > 100) { // Only backup files larger than 100 bytes (more than just headers)
                 const backupFilename = `${path.parse(filename).name}_${timestamp}${path.parse(filename).ext}`;
                 const destPath = path.join(backupDir, backupFilename);
-                
+
                 try {
                     fs.copyFileSync(sourcePath, destPath);
                     backedUpCount++;
@@ -201,7 +201,7 @@ function backupExistingFiles() {
 
 // API root endpoint
 app.get('/api', (req, res) => {
-    res.json({ 
+    res.json({
         message: 'Bank IFSC/MICR Processing API',
         version: '1.0.0',
         endpoints: {
@@ -483,9 +483,9 @@ app.post('/api/process-all', upload.fields([
 app.get('/api/backups', (req, res) => {
     try {
         const backupDir = path.join(__dirname, 'backups');
-        
+
         console.log('📦 Fetching backups from:', backupDir);
-        
+
         if (!fs.existsSync(backupDir)) {
             console.log('⚠️ Backups directory does not exist');
             return res.json({ backups: [] });
@@ -493,7 +493,7 @@ app.get('/api/backups', (req, res) => {
 
         const files = fs.readdirSync(backupDir);
         console.log(`📁 Found ${files.length} files in backups folder`);
-        
+
         // Extract unique timestamps from backup files
         const timestamps = new Set();
         files.forEach(file => {
@@ -535,7 +535,7 @@ app.delete('/api/backups/cleanup', (req, res) => {
     try {
         console.log('🧹 Manual cleanup requested...');
         const deletedCount = cleanupOldBackups();
-        
+
         res.json({
             success: true,
             message: `Cleanup complete. Removed ${deletedCount} old backup files.`,
@@ -556,7 +556,7 @@ app.get('/api/backups/:timestamp/:filename', (req, res) => {
     try {
         const { timestamp, filename } = req.params;
         const backupDir = path.join(__dirname, 'backups');
-        
+
         // Reconstruct the backup filename
         const baseName = path.parse(filename).name;
         const ext = path.parse(filename).ext;
@@ -773,17 +773,17 @@ app.listen(PORT, () => {
     console.log(`  GET  /api/backups - List available backups`);
     console.log(`  DELETE /api/backups/cleanup - Clean old backups`);
     console.log(`=================================\n`);
-    
+
     // Run initial cleanup of old backups on startup
     console.log('🧹 Running initial backup cleanup...');
     cleanupOldBackups();
-    
+
     // Schedule automatic cleanup every 24 hours
     setInterval(() => {
         console.log('🕐 Running scheduled backup cleanup (every 24 hours)...');
         cleanupOldBackups();
     }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
-    
+
     console.log('✅ Automatic backup cleanup scheduled (runs every 24 hours)\n');
 });
 

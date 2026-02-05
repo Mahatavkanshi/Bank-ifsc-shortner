@@ -31,7 +31,7 @@ const Dashboard = {
 
         try {
             console.log('📊 Loading all CSV files from server...');
-            
+
             // Load ALL CSV files - No records will be missed!
             // Using Promise.allSettled to load even if some files are missing
             const results = await Promise.allSettled([
@@ -52,12 +52,12 @@ const Dashboard = {
 
             // Extract data from settled promises
             const [
-                valid, 
-                invalid, 
-                ifscMatched, 
-                micrMatched, 
-                bothUnmatched, 
-                corrected, 
+                valid,
+                invalid,
+                ifscMatched,
+                micrMatched,
+                bothUnmatched,
+                corrected,
                 exactMatches,
                 ifscMismatchMicrFound,
                 micrMismatchIfscFound,
@@ -330,7 +330,7 @@ const Dashboard = {
             html += '<div class="pagination mt-3">';
             html += `<button class="btn btn-sm" onclick="Dashboard.goToPage(1)" ${this.currentPage === 1 ? 'disabled' : ''}>First</button>`;
             html += `<button class="btn btn-sm" onclick="Dashboard.goToPage(${this.currentPage - 1})" ${this.currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-            
+
             // Page numbers
             for (let i = Math.max(1, this.currentPage - 2); i <= Math.min(totalPages, this.currentPage + 2); i++) {
                 html += `<button class="btn btn-sm ${i === this.currentPage ? 'active' : ''}" onclick="Dashboard.goToPage(${i})">${i}</button>`;
@@ -362,9 +362,9 @@ const Dashboard = {
      * Handle search
      */
     handleSearch: Utils.debounce(function() {
-        const searchTerm = document.getElementById('searchBox')?.value;
+        const searchTerm = document.getElementById('searchBox') ? .value;
         const data = Dashboard.currentData[Dashboard.currentView];
-        
+
         if (!searchTerm) {
             Dashboard.currentPage = 1;
             Dashboard.viewDataset(Dashboard.currentView);
@@ -376,7 +376,7 @@ const Dashboard = {
 
         Dashboard.currentPage = 1;
         const info = Dashboard.getDatasetInfo(Dashboard.currentView);
-        Dashboard.renderDataTable(filtered, { ...info, title: `${info.title} (Filtered)` });
+        Dashboard.renderDataTable(filtered, {...info, title: `${info.title} (Filtered)` });
     }, 300),
 
     /**
@@ -407,7 +407,7 @@ const Dashboard = {
     async viewFile(filename) {
         try {
             const data = await API.readCSVFile(filename);
-            
+
             if (data.length === 0) {
                 UI.notify('File is empty or could not be read', 'warning');
                 return;
@@ -416,7 +416,7 @@ const Dashboard = {
             // Render in modal
             const headers = Object.keys(data[0]);
             let tableHTML = '<div class="table-container"><table class="table-striped"><thead><tr>';
-            
+
             tableHTML += '<th>#</th>';
             headers.forEach(h => tableHTML += `<th>${Utils.camelToTitle(h)}</th>`);
             tableHTML += '</tr></thead><tbody>';
@@ -469,16 +469,16 @@ const Dashboard = {
     async showOldDataModal() {
         const modal = document.getElementById('oldDataModal');
         const backupList = document.getElementById('oldDataBackupList');
-        
+
         if (!modal || !backupList) return;
-        
+
         modal.style.display = 'block';
         backupList.innerHTML = '<p>Loading available backups...</p>';
-        
+
         try {
             const response = await fetch(`${API.baseURL}/backups`);
             const data = await response.json();
-            
+
             if (!data.backups || data.backups.length === 0) {
                 backupList.innerHTML = `
                     <div class="alert alert-info">
@@ -488,19 +488,19 @@ const Dashboard = {
                 `;
                 return;
             }
-            
+
             // Display backup list
             let html = '<h3>Available Backups (Last 7 Days)</h3>';
             html += '<p class="text-muted">Backups older than 7 days are automatically deleted</p>';
             html += '<div class="backup-list">';
-            
+
             data.backups.forEach(backup => {
                 // Calculate age of backup
                 const backupDate = new Date(backup.timestamp.replace(/-/g, ':').replace('T', ' '));
                 const now = new Date();
                 const ageInDays = Math.floor((now - backupDate) / (1000 * 60 * 60 * 24));
                 const ageInHours = Math.floor((now - backupDate) / (1000 * 60 * 60));
-                
+
                 let ageDisplay;
                 if (ageInDays === 0) {
                     if (ageInHours === 0) {
@@ -517,7 +517,7 @@ const Dashboard = {
                 } else {
                     ageDisplay = `<span style="color: #dc3545;">${ageInDays} days ago (will be deleted soon)</span>`;
                 }
-                
+
                 html += `
                     <div class="backup-item card" style="margin-bottom: 15px;">
                         <div class="card-body">
@@ -531,10 +531,10 @@ const Dashboard = {
                     </div>
                 `;
             });
-            
+
             html += '</div>';
             backupList.innerHTML = html;
-            
+
         } catch (error) {
             console.error('Error loading backups:', error);
             backupList.innerHTML = `
@@ -563,7 +563,7 @@ const Dashboard = {
     backToBackupList() {
         const backupList = document.getElementById('oldDataBackupList');
         const viewer = document.getElementById('oldDataViewer');
-        
+
         if (backupList) backupList.style.display = 'block';
         if (viewer) viewer.style.display = 'none';
     },
@@ -575,13 +575,13 @@ const Dashboard = {
         const backupList = document.getElementById('oldDataBackupList');
         const viewer = document.getElementById('oldDataViewer');
         const content = document.getElementById('oldDataContent');
-        
+
         if (!viewer || !content) return;
-        
+
         backupList.style.display = 'none';
         viewer.style.display = 'block';
         content.innerHTML = '<p>Loading backup data...</p>';
-        
+
         try {
             // Map file types to display names
             const fileMapping = {
@@ -597,27 +597,27 @@ const Dashboard = {
                 'exact_matches_report': 'Exact Matches Report',
                 'ifsc_matched_records': 'IFSC Matched Records'
             };
-            
+
             let html = `<h3>Backup from ${new Date(timestamp.replace(/-/g, ':').replace('T', ' ')).toLocaleString()}</h3>`;
             html += '<div class="backup-files">';
-            
+
             // Create buttons for each file type
             for (const file of files) {
                 const baseName = file.replace(`_${timestamp}.csv`, '');
                 const displayName = fileMapping[baseName] || baseName;
-                
+
                 html += `
                     <button class="btn btn-secondary" style="margin: 5px;" onclick="Dashboard.loadBackupFile('${timestamp}', '${baseName}.csv')">
                         📄 ${displayName}
                     </button>
                 `;
             }
-            
+
             html += '</div>';
             html += '<div id="backupFileContent" style="margin-top: 20px;"></div>';
-            
+
             content.innerHTML = html;
-            
+
         } catch (error) {
             console.error('Error viewing backup:', error);
             content.innerHTML = `
@@ -635,28 +635,28 @@ const Dashboard = {
     async loadBackupFile(timestamp, filename) {
         const fileContent = document.getElementById('backupFileContent');
         if (!fileContent) return;
-        
+
         fileContent.innerHTML = '<p>Loading file...</p>';
-        
+
         try {
             const response = await fetch(`${API.baseURL}/backups/${timestamp}/${filename}`);
             const text = await response.text();
-            
+
             // Parse CSV
             const rows = text.trim().split('\n').map(row => {
                 // Simple CSV parsing (handles basic cases)
                 return row.split(',').map(cell => cell.trim());
             });
-            
+
             if (rows.length === 0) {
                 fileContent.innerHTML = '<p>File is empty</p>';
                 return;
             }
-            
+
             // Create table
             const headers = rows[0];
             const dataRows = rows.slice(1);
-            
+
             let html = `
                 <h4>${filename}</h4>
                 <p><strong>Total records:</strong> ${dataRows.length}</p>
@@ -665,17 +665,17 @@ const Dashboard = {
                         <thead>
                             <tr>
             `;
-            
+
             headers.forEach(header => {
                 html += `<th>${header}</th>`;
             });
-            
+
             html += `
                             </tr>
                         </thead>
                         <tbody>
             `;
-            
+
             // Show first 100 rows
             const displayRows = dataRows.slice(0, 100);
             displayRows.forEach(row => {
@@ -685,19 +685,19 @@ const Dashboard = {
                 });
                 html += '</tr>';
             });
-            
+
             html += `
                         </tbody>
                     </table>
                 </div>
             `;
-            
+
             if (dataRows.length > 100) {
                 html += `<p class="text-muted">Showing first 100 of ${dataRows.length} records</p>`;
             }
-            
+
             fileContent.innerHTML = html;
-            
+
         } catch (error) {
             console.error('Error loading backup file:', error);
             fileContent.innerHTML = `
@@ -721,12 +721,12 @@ const Dashboard = {
             const response = await fetch(`${API.baseURL}/backups/cleanup`, {
                 method: 'DELETE'
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 UI.notify(`${data.message} (${data.deletedCount} files removed)`, 'success');
-                
+
                 // Refresh the old data modal if it's open
                 const modal = document.getElementById('oldDataModal');
                 if (modal && modal.style.display === 'block') {
@@ -735,7 +735,7 @@ const Dashboard = {
             } else {
                 UI.notify('Cleanup failed: ' + data.message, 'error');
             }
-            
+
         } catch (error) {
             console.error('Error during cleanup:', error);
             UI.notify('Failed to clean up old backups', 'error');
@@ -781,11 +781,11 @@ class App {
      */
     static setupEventListeners() {
         // File input change listeners
-        document.getElementById('inputFile')?.addEventListener('change', () => {
+        document.getElementById('inputFile') ? .addEventListener('change', () => {
             UI.hideAlert('inputResult');
         });
 
-        document.getElementById('bankMappingFile')?.addEventListener('change', () => {
+        document.getElementById('bankMappingFile') ? .addEventListener('change', () => {
             UI.hideAlert('bankMappingResult');
         });
 
@@ -794,7 +794,7 @@ class App {
             // Ctrl/Cmd + K to focus search
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
-                document.getElementById('searchBox')?.focus();
+                document.getElementById('searchBox') ? .focus();
             }
         });
 

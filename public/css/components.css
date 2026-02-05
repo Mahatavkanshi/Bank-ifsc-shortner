@@ -1,6 +1,7 @@
 /* =========================================================
    BUTTONS
    ========================================================= */
+
 .btn {
     padding: 12px 30px;
     border: none;
@@ -81,9 +82,11 @@
     font-size: var(--font-lg);
 }
 
+
 /* =========================================================
    FORM ELEMENTS
    ========================================================= */
+
 .form-group {
     margin-bottom: var(--spacing-md);
 }
@@ -135,9 +138,11 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+
 /* =========================================================
    ALERTS & NOTIFICATIONS
    ========================================================= */
+
 .alert {
     margin-top: var(--spacing-md);
     padding: var(--spacing-md);
@@ -174,9 +179,11 @@ select:focus {
     color: #856404;
 }
 
+
 /* =========================================================
    CARDS
    ========================================================= */
+
 .card {
     background: white;
     border-radius: var(--radius-lg);
@@ -207,9 +214,11 @@ select:focus {
     border-top: 1px solid #dee2e6;
 }
 
+
 /* =========================================================
    STATS CARDS
    ========================================================= */
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -257,9 +266,11 @@ select:focus {
     color: var(--warning-color);
 }
 
+
 /* =========================================================
    TABLES
    ========================================================= */
+
 .table-container {
     overflow-x: auto;
     margin-top: var(--spacing-md);
@@ -313,9 +324,11 @@ tbody tr:last-child {
     background: #e9ecef;
 }
 
+
 /* =========================================================
    FILE LIST
    ========================================================= */
+
 .file-list {
     list-style: none;
     margin-top: var(--spacing-md);
@@ -359,9 +372,11 @@ tbody tr:last-child {
     margin-left: var(--spacing-sm);
 }
 
+
 /* =========================================================
    LOADING SPINNER
    ========================================================= */
+
 .loading {
     display: none;
     text-align: center;
@@ -383,8 +398,12 @@ tbody tr:last-child {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .loading p {
@@ -392,9 +411,11 @@ tbody tr:last-child {
     font-weight: 500;
 }
 
+
 /* =========================================================
    PROGRESS BAR
    ========================================================= */
+
 .progress-container {
     margin: var(--spacing-md) 0;
 }
@@ -419,9 +440,11 @@ tbody tr:last-child {
     font-weight: 600;
 }
 
+
 /* =========================================================
    BADGES
    ========================================================= */
+
 .badge {
     display: inline-block;
     padding: 4px 12px;
@@ -457,9 +480,11 @@ tbody tr:last-child {
     color: white;
 }
 
+
 /* =========================================================
    MODAL
    ========================================================= */
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -525,9 +550,11 @@ tbody tr:last-child {
     gap: var(--spacing-sm);
 }
 
+
 /* =========================================================
    PAGINATION
    ========================================================= */
+
 .pagination {
     display: flex;
     gap: var(--spacing-xs);
@@ -561,9 +588,11 @@ tbody tr:last-child {
     cursor: not-allowed;
 }
 
+
 /* =========================================================
    BACKUP MODAL STYLES
    ========================================================= */
+
 .backup-list {
     margin-top: 20px;
 }

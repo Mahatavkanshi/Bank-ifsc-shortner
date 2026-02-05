@@ -3,138 +3,138 @@
    ========================================================= */
 
 const UI = {
-    /**
-     * Show alert message
-     */
-    showAlert(elementId, type, message) {
-        const element = document.getElementById(elementId);
-        if (!element) return;
+        /**
+         * Show alert message
+         */
+        showAlert(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
 
-        element.className = `alert alert-${type} show`;
-        element.innerHTML = message;
-        element.style.display = 'block';
+            element.className = `alert alert-${type} show`;
+            element.innerHTML = message;
+            element.style.display = 'block';
 
-        // Auto hide after 10 seconds for success messages
-        if (type === 'success') {
-            setTimeout(() => this.hideAlert(elementId), 10000);
-        }
-    },
+            // Auto hide after 10 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => this.hideAlert(elementId), 10000);
+            }
+        },
 
-    /**
-     * Hide alert message
-     */
-    hideAlert(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.style.display = 'none';
-        }
-    },
+        /**
+         * Hide alert message
+         */
+        hideAlert(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.style.display = 'none';
+            }
+        },
 
-    /**
-     * Show loading spinner
-     */
-    showLoading(elementId, message = 'Processing...') {
-        const element = document.getElementById(elementId);
-        if (!element) return;
+        /**
+         * Show loading spinner
+         */
+        showLoading(elementId, message = 'Processing...') {
+            const element = document.getElementById(elementId);
+            if (!element) return;
 
-        element.innerHTML = `
+            element.innerHTML = `
             <div class="spinner"></div>
             <p>${message}</p>
         `;
-        element.classList.add('show');
-    },
+            element.classList.add('show');
+        },
 
-    /**
-     * Hide loading spinner
-     */
-    hideLoading(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.classList.remove('show');
-        }
-    },
+        /**
+         * Hide loading spinner
+         */
+        hideLoading(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.remove('show');
+            }
+        },
 
-    /**
-     * Update workflow step status
-     */
-    updateWorkflowStep(stepId, status) {
-        const step = document.getElementById(stepId);
-        if (!step) return;
+        /**
+         * Update workflow step status
+         */
+        updateWorkflowStep(stepId, status) {
+            const step = document.getElementById(stepId);
+            if (!step) return;
 
-        step.classList.remove('active', 'completed');
-        if (status) {
-            step.classList.add(status);
-        }
-    },
-
-    /**
-     * Reset workflow steps
-     */
-    resetWorkflow() {
-        document.querySelectorAll('.workflow-step').forEach(step => {
             step.classList.remove('active', 'completed');
-        });
-    },
+            if (status) {
+                step.classList.add(status);
+            }
+        },
 
-    /**
-     * Render statistics cards
-     */
-    renderStats(containerId, data) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
+        /**
+         * Reset workflow steps
+         */
+        resetWorkflow() {
+            document.querySelectorAll('.workflow-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+        },
 
-        let html = '<div class="stats-grid">';
-        
-        for (const [key, value] of Object.entries(data)) {
-            const title = Utils.camelToTitle(key);
-            const colorClass = this.getStatColorClass(key);
-            
-            html += `
+        /**
+         * Render statistics cards
+         */
+        renderStats(containerId, data) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let html = '<div class="stats-grid">';
+
+            for (const [key, value] of Object.entries(data)) {
+                const title = Utils.camelToTitle(key);
+                const colorClass = this.getStatColorClass(key);
+
+                html += `
                 <div class="stat-card ${colorClass}">
                     <h3>${title}</h3>
                     <p>${Utils.formatNumber(value)}</p>
                 </div>
             `;
-        }
-        
-        html += '</div>';
-        container.innerHTML = html;
-    },
-
-    /**
-     * Get color class for stat cards
-     */
-    getStatColorClass(key) {
-        const lowerKey = key.toLowerCase();
-        if (lowerKey.includes('matched') || lowerKey.includes('correct') || lowerKey.includes('success')) {
-            return 'success';
-        }
-        if (lowerKey.includes('unmatched') || lowerKey.includes('incorrect') || lowerKey.includes('missing')) {
-            return 'danger';
-        }
-        if (lowerKey.includes('both')) {
-            return 'warning';
-        }
-        return '';
-    },
-
-    /**
-     * Render table from data array
-     */
-    renderTable(containerId, data, options = {}) {
-        const container = document.getElementById(containerId);
-        if (!container || !data || data.length === 0) {
-            if (container) {
-                container.innerHTML = '<p class="text-center text-muted">No data available</p>';
             }
-            return;
-        }
 
-        const headers = options.headers || Object.keys(data[0]);
-        const maxRows = options.maxRows || data.length;
-        const showActions = options.showActions !== false;
+            html += '</div>';
+            container.innerHTML = html;
+        },
 
-        let html = `
+        /**
+         * Get color class for stat cards
+         */
+        getStatColorClass(key) {
+            const lowerKey = key.toLowerCase();
+            if (lowerKey.includes('matched') || lowerKey.includes('correct') || lowerKey.includes('success')) {
+                return 'success';
+            }
+            if (lowerKey.includes('unmatched') || lowerKey.includes('incorrect') || lowerKey.includes('missing')) {
+                return 'danger';
+            }
+            if (lowerKey.includes('both')) {
+                return 'warning';
+            }
+            return '';
+        },
+
+        /**
+         * Render table from data array
+         */
+        renderTable(containerId, data, options = {}) {
+            const container = document.getElementById(containerId);
+            if (!container || !data || data.length === 0) {
+                if (container) {
+                    container.innerHTML = '<p class="text-center text-muted">No data available</p>';
+                }
+                return;
+            }
+
+            const headers = options.headers || Object.keys(data[0]);
+            const maxRows = options.maxRows || data.length;
+            const showActions = options.showActions !== false;
+
+            let html = `
             <div class="table-container">
                 <table class="table-striped">
                     <thead>

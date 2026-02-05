@@ -24,9 +24,9 @@ const FileHandler = {
 
         // Check file extension
         if (!Utils.validateFileExtension(fileName, this.allowedExtensions)) {
-            return { 
-                valid: false, 
-                error: `Invalid file type. Allowed: ${this.allowedExtensions.join(', ')}` 
+            return {
+                valid: false,
+                error: `Invalid file type. Allowed: ${this.allowedExtensions.join(', ')}`
             };
         }
 
@@ -56,7 +56,7 @@ const FileHandler = {
 
             if (result.success) {
                 UI.updateWorkflowStep('step1', 'completed');
-                UI.showAlert('inputResult', 'success', 
+                UI.showAlert('inputResult', 'success',
                     `✅ File processed successfully!<br>
                     <strong>Total Records:</strong> ${Utils.formatNumber(result.data.totalRecords)}<br>
                     <strong>Valid Records:</strong> ${Utils.formatNumber(result.data.correctRecords)}<br>
@@ -94,7 +94,7 @@ const FileHandler = {
 
             if (result.success) {
                 UI.updateWorkflowStep('step2', 'completed');
-                UI.showAlert('bankMappingResult', 'success', 
+                UI.showAlert('bankMappingResult', 'success',
                     `✅ Bank mapping loaded successfully!<br>
                     <strong>Records Loaded:</strong> ${Utils.formatNumber(result.recordCount)}`
                 );
@@ -112,29 +112,29 @@ const FileHandler = {
      */
     async processAll() {
         console.log('🚀 ProcessAll called');
-        
+
         const inputFileElement = document.getElementById('quickInputFile');
         const bankMappingElement = document.getElementById('quickBankMapping');
-        
+
         console.log('Input file element:', inputFileElement);
         console.log('Bank mapping element:', bankMappingElement);
-        
+
         if (!inputFileElement || !bankMappingElement) {
             console.error('❌ File input elements not found!');
             UI.showAlert('quickResult', 'error', '❌ Error: File input elements not found');
             return;
         }
-        
+
         const inputFile = inputFileElement.files[0];
         const bankMappingFile = bankMappingElement.files[0];
-        
+
         console.log('Input file:', inputFile);
         console.log('Bank mapping file:', bankMappingFile);
 
         // Validate both files
         const inputValidation = this.validateFile(inputFile);
         const mappingValidation = this.validateFile(bankMappingFile);
-        
+
         console.log('Input validation:', inputValidation);
         console.log('Mapping validation:', mappingValidation);
 
@@ -150,15 +150,15 @@ const FileHandler = {
 
         UI.hideAlert('quickResult');
         UI.showLoading('quickLoading', 'Processing complete workflow... This may take a few moments.');
-        
+
         // Switch to Step-by-Step tab
         UI.switchTab('stepByStep');
-        
+
         console.log('📤 Sending files to server...');
 
         try {
             const result = await API.processAll(inputFile, bankMappingFile);
-            
+
             console.log('✅ Server response:', result);
 
             UI.hideLoading('quickLoading');
@@ -171,7 +171,7 @@ const FileHandler = {
 
                 // Refresh file list
                 await this.listFiles();
-                
+
                 // Show completion modal with option to go to dashboard
                 this.showProcessingCompleteModal(result);
 
@@ -190,30 +190,30 @@ const FileHandler = {
     showProcessingCompleteModal(result) {
         // Build detailed success message
         let message = '<div style="text-align: left;">';
-        
+
         message += '<h3 style="color: #28a745; margin-bottom: 20px;">✅ Processing Complete!</h3>';
-        
+
         message += '<strong>📊 Filtering Results:</strong><br>';
         message += `<ul style="margin: 10px 0;">`;
         message += `<li>Total Records: ${Utils.formatNumber(result.data.filtering.totalRecords)}</li>`;
         message += `<li>Valid: ${Utils.formatNumber(result.data.filtering.correctRecords)}</li>`;
         message += `<li>Invalid: ${Utils.formatNumber(result.data.filtering.incorrectRecords)}</li>`;
         message += '</ul>';
-        
+
         message += '<strong>🔍 Comparison Results:</strong><br>';
         message += `<ul style="margin: 10px 0;">`;
         message += `<li>IFSC Matched: ${Utils.formatNumber(result.data.comparison.ifscMatched)}</li>`;
         message += `<li>MICR Matched: ${Utils.formatNumber(result.data.comparison.micrMatched)}</li>`;
         message += `<li>Both Missing: ${Utils.formatNumber(result.data.comparison.bothMissing)}</li>`;
         message += '</ul>';
-        
+
         message += '<strong>🎯 Fuzzy Matching Results:</strong><br>';
         message += `<ul style="margin: 10px 0;">`;
         message += `<li>Total Records: ${Utils.formatNumber(result.data.fuzzyMatching.totalRecords)}</li>`;
         message += `<li>Bank Groups: ${Utils.formatNumber(result.data.fuzzyMatching.uniqueGroups)}</li>`;
         message += `<li>Corrections Made: ${Utils.formatNumber(result.data.fuzzyMatching.correctionsMade)}</li>`;
         message += '</ul>';
-        
+
         if (result.data.backup) {
             message += '<strong>💾 Backup:</strong><br>';
             message += `<ul style="margin: 10px 0;">`;
@@ -223,15 +223,15 @@ const FileHandler = {
             }
             message += '</ul>';
         }
-        
+
         message += '<div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">';
         message += '<p style="font-size: 18px; margin-bottom: 15px;">All processing steps completed successfully!</p>';
         message += '<button class="btn btn-success btn-lg" onclick="UI.switchTab(\'dashboard\'); Dashboard.loadDashboard(); UI.closeModal();" style="margin-right: 10px;">📊 Go to Dashboard</button>';
         message += '<button class="btn btn-secondary" onclick="UI.closeModal()">Close</button>';
         message += '</div>';
-        
+
         message += '</div>';
-        
+
         UI.showModal('Processing Complete', message);
     },
 

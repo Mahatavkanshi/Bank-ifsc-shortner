@@ -47,12 +47,12 @@ async function loadBankMappingFile(filePath) {
     if (['.csv', '.001', '.txt', '.dat'].includes(ext)) {
         return new Promise((resolve, reject) => {
             const records = [];
-            const rl = readline.createInterface({ 
+            const rl = readline.createInterface({
                 input: fs.createReadStream(filePath),
                 crlfDelay: Infinity
             });
-            rl.on('line', line => { 
-                if (line.trim()) records.push(line.split('~')); 
+            rl.on('line', line => {
+                if (line.trim()) records.push(line.split('~'));
             });
             rl.on('close', () => resolve(records));
             rl.on('error', reject);
@@ -115,12 +115,12 @@ function filterCsvFile(filePath) {
         rl.on('close', () => {
             writeStream.end();
             validStream.end();
-            resolve({ 
-                totalRecords, 
-                correctRecords, 
-                incorrectRecords, 
-                validRecordsFile, 
-                outputFile 
+            resolve({
+                totalRecords,
+                correctRecords,
+                incorrectRecords,
+                validRecordsFile,
+                outputFile
             });
         });
 
@@ -160,12 +160,12 @@ function filterArrayData(records) {
     invalidStream.end();
     validStream.end();
 
-    return { 
-        totalRecords, 
-        correctRecords, 
-        incorrectRecords, 
-        validRecordsFile, 
-        outputFile 
+    return {
+        totalRecords,
+        correctRecords,
+        incorrectRecords,
+        validRecordsFile,
+        outputFile
     };
 }
 
@@ -224,7 +224,7 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
             bothMissingCount = 0,
             totalLinesRead = 0;
 
-        const rl = readline.createInterface({ 
+        const rl = readline.createInterface({
             input: fs.createReadStream(validFile),
             crlfDelay: Infinity
         });
@@ -282,7 +282,7 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
             console.log(`MICR Missing (IFSC Present): ${micrMissingIfscPresentCount}`);
             console.log(`Both Missing: ${bothMissingCount}`);
             console.log(`==========================\n`);
-            
+
             // Wait for all 7 streams to finish before resolving
             let streamsToClose = 7;
             const streamClosed = () => {
@@ -815,17 +815,17 @@ module.exports = {
     // File reading
     readBankFile,
     loadBankMappingFile,
-    
+
     // Validation & Filtering
     filterCsvFile,
     filterArrayData,
-    
+
     // Comparison & Matching
     compareIfscAndMicrWithBankMapping,
-    
+
     // Sorting
     sortByIfsc,
-    
+
     // Fuzzy Matching
     applyFuzzyMatchingToBankNames,
     BestNameMatcher,

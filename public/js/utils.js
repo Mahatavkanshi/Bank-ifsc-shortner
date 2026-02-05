@@ -197,7 +197,7 @@ const Utils = {
         return array.sort((a, b) => {
             const aVal = a[key];
             const bVal = b[key];
-            
+
             if (aVal < bVal) return ascending ? -1 : 1;
             if (aVal > bVal) return ascending ? 1 : -1;
             return 0;
@@ -223,7 +223,7 @@ const Utils = {
      */
     filterBySearch(array, searchTerm, keys) {
         if (!searchTerm) return array;
-        
+
         const term = searchTerm.toLowerCase();
         return array.filter(item => {
             return keys.some(key => {
