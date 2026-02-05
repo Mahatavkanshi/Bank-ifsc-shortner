@@ -1,0 +1,307 @@
+/* =========================================================
+   TABLET DEVICES (768px - 1024px)
+   ========================================================= */
+@media screen and (max-width: 1024px) {
+    .container {
+        max-width: 95%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    
+    .workflow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .workflow-step::after {
+        content: '↓';
+        right: 50%;
+        top: auto;
+        bottom: -20px;
+        transform: translateX(50%);
+    }
+    
+    .workflow-step:last-child::after {
+        display: none;
+    }
+}
+
+/* =========================================================
+   MOBILE DEVICES (max-width: 768px)
+   ========================================================= */
+@media screen and (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .header h1 {
+        font-size: var(--font-2xl);
+    }
+    
+    .header p {
+        font-size: var(--font-md);
+    }
+    
+    .content {
+        padding: var(--spacing-md);
+    }
+    
+    .section {
+        padding: var(--spacing-md);
+    }
+    
+    .section h2 {
+        font-size: var(--font-lg);
+    }
+    
+    .section h3 {
+        font-size: var(--font-md);
+    }
+    
+    /* Buttons */
+    .btn {
+        width: 100%;
+        margin-right: 0;
+        justify-content: center;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Tables */
+    .table-container {
+        font-size: var(--font-sm);
+    }
+    
+    thead th,
+    tbody td {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Navigation Tabs */
+    .nav-tabs {
+        flex-direction: column;
+    }
+    
+    .nav-tab {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* File List */
+    .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .file-item .btn {
+        width: 100%;
+    }
+    
+    /* Modal */
+    .modal {
+        max-width: 95%;
+        margin: var(--spacing-sm);
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   SMALL MOBILE DEVICES (max-width: 480px)
+   ========================================================= */
+@media screen and (max-width: 480px) {
+    :root {
+        font-size: 14px;
+    }
+    
+    .header {
+        padding: var(--spacing-md);
+    }
+    
+    .header h1 {
+        font-size: var(--font-xl);
+    }
+    
+    .section {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .stat-card p {
+        font-size: var(--font-xl);
+    }
+    
+    /* Hide less critical columns in tables */
+    .table-responsive-hide {
+        display: none;
+    }
+    
+    /* Workflow */
+    .workflow-step {
+        min-width: 100%;
+        padding: var(--spacing-sm);
+    }
+}
+
+/* =========================================================
+   PRINT STYLES
+   ========================================================= */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .container {
+        box-shadow: none;
+        max-width: 100%;
+    }
+    
+    .header {
+        background: none;
+        color: black;
+        border-bottom: 2px solid black;
+    }
+    
+    .btn,
+    .loading,
+    .nav-tabs,
+    .modal-overlay {
+        display: none !important;
+    }
+    
+    .section {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    table {
+        page-break-inside: auto;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    thead {
+        display: table-header-group;
+    }
+    
+    tfoot {
+        display: table-footer-group;
+    }
+}
+
+/* =========================================================
+   LANDSCAPE ORIENTATION
+   ========================================================= */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+    .header {
+        padding: var(--spacing-md);
+    }
+    
+    .header h1 {
+        font-size: var(--font-xl);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .content {
+        padding: var(--spacing-md);
+    }
+    
+    .section {
+        padding: var(--spacing-md);
+    }
+}
+
+/* =========================================================
+   HIGH DPI DISPLAYS
+   ========================================================= */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* =========================================================
+   DARK MODE SUPPORT
+   ========================================================= */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dark-color: #f8f9fa;
+        --light-color: #2d3748;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+    
+    .container {
+        background: #1a202c;
+        color: #f8f9fa;
+    }
+    
+    .section {
+        background: #2d3748;
+    }
+    
+    .card,
+    .stat-card,
+    .file-item,
+    table {
+        background: #2d3748;
+        color: #f8f9fa;
+    }
+    
+    input[type="file"],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    textarea,
+    select {
+        background: #1a202c;
+        color: #f8f9fa;
+        border-color: #4a5568;
+    }
+    
+    thead {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    }
+    
+    tbody tr {
+        border-color: #4a5568;
+    }
+    
+    tbody tr:hover {
+        background: #374151;
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

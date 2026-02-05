@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bank IFSC/MICR Processing System - Upload and process bank data files with advanced matching algorithms">
+    <title>Bank IFSC/MICR Processing System</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏦 Bank IFSC/MICR Processing System</h1>
+            <p>Upload and process bank data files with advanced matching algorithms</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="quickStart">🚀 Quick Start</button>
+                <button class="nav-tab" data-tab="stepByStep">📋 Step-by-Step</button>
+                <button class="nav-tab" data-tab="dashboard">📊 Dashboard</button>
+                <button class="nav-tab" data-tab="downloads">📥 Downloads</button>
+            </div>
+
+            <!-- Quick Start Tab -->
+            <div id="quickStart" class="tab-content active">
+                <div class="section">
+                    <h2>🚀 Quick Start - Complete Processing</h2>
+                    <p>Upload both files at once and process the entire workflow automatically.</p>
+                    
+                    <div class="form-group">
+                        <label for="quickInputFile">Input File (CSV/Excel/JSON):</label>
+                        <input type="file" id="quickInputFile" accept=".csv,.xlsx,.xls,.json,.txt,.dat,.001">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quickBankMapping">Bank Mapping File:</label>
+                        <input type="file" id="quickBankMapping" accept=".csv,.xlsx,.xls,.txt,.dat,.001">
+                    </div>
+
+                    <button class="btn btn-success btn-lg" onclick="FileHandler.processAll()">
+                        🎯 Process All Steps
+                    </button>
+
+                    <div id="quickResult" class="alert"></div>
+                    
+                    <div id="quickLoading" class="loading">
+                        <div class="spinner"></div>
+                        <p>Processing... This may take a few moments.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Tab -->
+            <div id="stepByStep" class="tab-content">
+                <div class="section">
+                    <h2>📋 Step-by-Step Processing</h2>
+                    
+                    <!-- Workflow Visualization -->
+                    <div class="workflow">
+                        <div class="workflow-step" id="step1">
+                            <div>Step 1</div>
+                            <div>Upload Input</div>
+                        </div>
+                        <div class="workflow-step" id="step2">
+                            <div>Step 2</div>
+                            <div>Upload Mapping</div>
+                        </div>
+                        <div class="workflow-step" id="step3">
+                            <div>Step 3</div>
+                            <div>Compare</div>
+                        </div>
+                        <div class="workflow-step" id="step4">
+                            <div>Step 4</div>
+                            <div>Fuzzy Match</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload Input File -->
+                    <div class="mt-4">
+                        <h3>Step 1: Upload Input File</h3>
+                        <div class="form-group">
+                            <label for="inputFile">Select Input File:</label>
+                            <input type="file" id="inputFile" accept=".csv,.xlsx,.xls,.json,.txt,.dat,.001">
+                        </div>
+                        <button class="btn btn-primary" onclick="FileHandler.uploadInputFile()">
+                            📤 Upload Input File
+                        </button>
+                        <div id="inputResult" class="alert"></div>
+                        <div id="inputLoading" class="loading"></div>
+                    </div>
+
+                    <!-- Step 2: Upload Bank Mapping -->
+                    <div class="mt-4">
+                        <h3>Step 2: Upload Bank Mapping File</h3>
+                        <div class="form-group">
+                            <label for="bankMappingFile">Select Bank Mapping File:</label>
+                            <input type="file" id="bankMappingFile" accept=".csv,.xlsx,.xls,.txt,.dat,.001">
+                        </div>
+                        <button class="btn btn-primary" onclick="FileHandler.uploadBankMapping()">
+                            📤 Upload Bank Mapping
+                        </button>
+                        <div id="bankMappingResult" class="alert"></div>
+                        <div id="bankMappingLoading" class="loading"></div>
+                    </div>
+
+                    <!-- Step 3: Compare -->
+                    <div class="mt-4">
+                        <h3>Step 3: Compare IFSC & MICR Codes</h3>
+                        <button class="btn btn-primary" onclick="FileHandler.compareData()">
+                            🔍 Run Comparison
+                        </button>
+                        <div id="compareResult" class="alert"></div>
+                        <div id="compareLoading" class="loading"></div>
+                        <div id="compareStats" class="mt-3"></div>
+                    </div>
+
+                    <!-- Step 4: Fuzzy Matching -->
+                    <div class="mt-4">
+                        <h3>Step 4: Apply Fuzzy Matching to Bank Names</h3>
+                        <button class="btn btn-primary" onclick="FileHandler.fuzzyMatch()">
+                            🎯 Run Fuzzy Matching
+                        </button>
+                        <div id="fuzzyResult" class="alert"></div>
+                        <div id="fuzzyLoading" class="loading"></div>
+                        <div id="fuzzyStats" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content">
+                <div class="section">
+                    <h2>📊 Data Dashboard</h2>
+                    <p>View all processed records and detailed analytics</p>
+
+                    <button class="btn btn-primary" onclick="Dashboard.loadDashboard()">
+                        🔄 Refresh Dashboard
+                    </button>
+                    
+                    <button class="btn btn-warning" onclick="Dashboard.showOldDataModal()" style="margin-left: 10px;">
+                        🕒 View Old Data
+                    </button>
+                    
+                    <button class="btn btn-danger" onclick="Dashboard.cleanupOldBackups()" style="margin-left: 10px;">
+                        🗑️ Clean Old Backups
+                    </button>
+
+                    <div id="dashboardLoading" class="loading"></div>
+                    <div id="dashboardAlert" class="alert"></div>
+                    
+                    <!-- Overview Stats -->
+                    <div id="dashboardOverview" class="mt-4">
+                        <p class="text-muted">Click "Refresh Dashboard" to load data...</p>
+                    </div>
+
+                    <!-- Dataset Selector -->
+                    <div id="datasetSelector" class="mt-4"></div>
+
+                    <!-- Data Table Container -->
+                    <div id="dataTableContainer"></div>
+                </div>
+            </div>
+
+            <!-- Downloads Tab -->
+            <div id="downloads" class="tab-content">
+                <div class="section">
+                    <h2>📥 Download Results</h2>
+                    <p>Download generated files and manage output data</p>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-secondary" onclick="FileHandler.listFiles()">
+                            🔄 Refresh File List
+                        </button>
+                        <button class="btn btn-danger" onclick="FileHandler.cleanupFiles()">
+                            🗑️ Clean Up All Files
+                        </button>
+                    </div>
+                    
+                    <ul id="fileList" class="file-list mt-4">
+                        <li class="file-item">Loading files...</li>
+                    </ul>
+                </div>
+
+                <!-- File Information Section -->
+                <div class="section">
+                    <h2>📄 Generated Files Information</h2>
+                    
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <strong>Validation Results</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>valid_records.csv</strong> - Records with valid IFSC (11 chars) and MICR (9 chars)</li>
+                                <li><strong>invalid_records.csv</strong> - Records that failed validation</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <strong>Matching Results</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>ifsc_matched.csv</strong> - Records with IFSC found in bank mapping</li>
+                                <li><strong>ifsc_unmatched.csv</strong> - Records with IFSC not found</li>
+                                <li><strong>micr_matched.csv</strong> - Records with MICR found in bank mapping</li>
+                                <li><strong>micr_unmatched.csv</strong> - Records with MICR not found</li>
+                                <li><strong>ifsc_missing_micr_present.csv</strong> - IFSC not found but MICR found</li>
+                                <li><strong>micr_missing_ifsc_present.csv</strong> - MICR not found but IFSC found</li>
+                                <li><strong>ifsc_micr_both_unmatched.csv</strong> - Both IFSC and MICR not found</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <strong>Fuzzy Matching Results</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>bank_names_corrected.csv</strong> - Full details with bank name corrections</li>
+                                <li><strong>only_corrected_bank_names.csv</strong> - Mapping of original to corrected names</li>
+                                <li><strong>exact_matches_report.csv</strong> - Summary of grouped bank names</li>
+                                <li><strong>ifsc_matched_records.csv</strong> - All matched records with corrections</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Old Data Modal -->
+    <div id="oldDataModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>🕒 View Old Data</h2>
+                <span class="close" onclick="Dashboard.closeOldDataModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="oldDataBackupList">
+                    <p>Loading available backups...</p>
+                </div>
+                <div id="oldDataViewer" style="display: none;">
+                    <button class="btn btn-secondary" onclick="Dashboard.backToBackupList()" style="margin-bottom: 15px;">
+                        ← Back to Backup List
+                    </button>
+                    <div id="oldDataContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/fileHandler.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
