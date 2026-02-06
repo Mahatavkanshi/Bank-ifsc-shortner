@@ -267,5 +267,65 @@
     <script src="js/ui.js"></script>
     <script src="js/fileHandler.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- Initialize App -->
+    <script>
+        // Ensure app initializes when all scripts are loaded
+        window.addEventListener('load', function() {
+            console.log('🎯 All resources loaded, checking app initialization...');
+            
+            // Verify all required objects are available
+            const modules = {
+                Utils: typeof Utils !== 'undefined',
+                API: typeof API !== 'undefined',
+                UI: typeof UI !== 'undefined',
+                FileHandler: typeof FileHandler !== 'undefined',
+                Dashboard: typeof Dashboard !== 'undefined',
+                App: typeof App !== 'undefined'
+            };
+            
+            let allLoaded = true;
+            Object.entries(modules).forEach(([name, loaded]) => {
+                if (!loaded) {
+                    console.error(`❌ ${name} not loaded`);
+                    allLoaded = false;
+                } else {
+                    console.log(`✅ ${name} loaded`);
+                }
+            });
+            
+            if (allLoaded) {
+                console.log('✅ All modules loaded successfully');
+                console.log('🔧 Verifying tab functionality...');
+                
+                // Test tab click handlers
+                const tabs = document.querySelectorAll('.nav-tab');
+                console.log(`📑 Found ${tabs.length} tabs`);
+                tabs.forEach(tab => {
+                    const tabName = tab.getAttribute('data-tab');
+                    console.log(`  - Tab: ${tabName}, clickable: ${tab.style.pointerEvents !== 'none'}`);
+                });
+                
+                console.log('🎉 Application ready!');
+            } else {
+                console.error('❌ Some modules failed to load. Please refresh the page.');
+            }
+        });
+        
+        // Add global error handler
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Global error:', e.message, 'at', e.filename, 'line', e.lineno);
+        });
+        
+        // Make FileHandler methods globally accessible for debugging
+        window.debugGoToDashboard = function() {
+            console.log('🐛 Debug: Going to dashboard...');
+            UI.closeModal();
+            setTimeout(() => {
+                UI.switchTab('dashboard');
+                Dashboard.loadDashboard();
+            }, 100);
+        };
+    </script>
 </body>
 </html>

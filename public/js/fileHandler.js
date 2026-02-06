@@ -172,10 +172,19 @@ const FileHandler = {
                 // Refresh file list
                 await this.listFiles();
 
+                // Show success message on Quick Start tab
+                UI.showAlert('quickResult', 'success', '✅ All processing completed successfully! Check the Dashboard or Downloads tab.');
+
                 // Show completion modal with option to go to dashboard
                 this.showProcessingCompleteModal(result);
+                
+                // Auto-load dashboard data in background
+                setTimeout(() => {
+                    Dashboard.loadDashboard();
+                }, 500);
 
             } else {
+                UI.switchTab('quickStart');
                 UI.showAlert('quickResult', 'error', `❌ ${result.error}: ${result.message}`);
             }
         } catch (error) {
@@ -226,13 +235,35 @@ const FileHandler = {
 
         message += '<div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">';
         message += '<p style="font-size: 18px; margin-bottom: 15px;">All processing steps completed successfully!</p>';
-        message += '<button class="btn btn-success btn-lg" onclick="UI.switchTab(\'dashboard\'); Dashboard.loadDashboard(); UI.closeModal();" style="margin-right: 10px;">📊 Go to Dashboard</button>';
+        message += '<button class="btn btn-success btn-lg" onclick="FileHandler.goToDashboard()" style="margin-right: 10px;">📊 Go to Dashboard</button>';
+        message += '<button class="btn btn-info btn-lg" onclick="FileHandler.goToDownloads()" style="margin-right: 10px;">📥 Go to Downloads</button>';
         message += '<button class="btn btn-secondary" onclick="UI.closeModal()">Close</button>';
         message += '</div>';
 
         message += '</div>';
 
         UI.showModal('Processing Complete', message);
+    },
+
+    /**
+     * Navigate to dashboard and load data
+     */
+    goToDashboard() {
+        UI.closeModal();
+        setTimeout(() => {
+            UI.switchTab('dashboard');
+            Dashboard.loadDashboard();
+        }, 100);
+    },
+
+    /**
+     * Navigate to downloads tab
+     */
+    goToDownloads() {
+        UI.closeModal();
+        setTimeout(() => {
+            UI.switchTab('downloads');
+        }, 100);
     },
 
     /**

@@ -17,6 +17,9 @@
     gap: var(--spacing-xs);
     text-decoration: none;
     outline: none;
+    pointer-events: auto;
+    position: relative;
+    z-index: 5;
 }
 
 .btn:disabled {

@@ -362,7 +362,8 @@ const Dashboard = {
      * Handle search
      */
     handleSearch: Utils.debounce(function() {
-        const searchTerm = document.getElementById('searchBox') ? .value;
+        const searchBox = document.getElementById('searchBox');
+        const searchTerm = searchBox ? searchBox.value : '';
         const data = Dashboard.currentData[Dashboard.currentView];
 
         if (!searchTerm) {
@@ -781,20 +782,29 @@ class App {
      */
     static setupEventListeners() {
         // File input change listeners
-        document.getElementById('inputFile') ? .addEventListener('change', () => {
-            UI.hideAlert('inputResult');
-        });
+        const inputFile = document.getElementById('inputFile');
+        if (inputFile) {
+            inputFile.addEventListener('change', () => {
+                UI.hideAlert('inputResult');
+            });
+        }
 
-        document.getElementById('bankMappingFile') ? .addEventListener('change', () => {
-            UI.hideAlert('bankMappingResult');
-        });
+        const bankMappingFile = document.getElementById('bankMappingFile');
+        if (bankMappingFile) {
+            bankMappingFile.addEventListener('change', () => {
+                UI.hideAlert('bankMappingResult');
+            });
+        }
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             // Ctrl/Cmd + K to focus search
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
-                document.getElementById('searchBox') ? .focus();
+                const searchBox = document.getElementById('searchBox');
+                if (searchBox) {
+                    searchBox.focus();
+                }
             }
         });
 

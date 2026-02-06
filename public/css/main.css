@@ -107,6 +107,8 @@ body {
 
 .content {
     padding: var(--spacing-xl);
+    position: relative;
+    z-index: 1;
 }
 
 .section {
@@ -149,6 +151,9 @@ body {
     margin-bottom: var(--spacing-lg);
     border-bottom: 2px solid #dee2e6;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .nav-tab {
@@ -161,6 +166,9 @@ body {
     font-weight: 600;
     color: var(--secondary-color);
     transition: all var(--transition-normal);
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .nav-tab:hover {

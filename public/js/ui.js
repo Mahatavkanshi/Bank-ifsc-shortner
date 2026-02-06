@@ -212,9 +212,12 @@ const UI = {
      * Switch between tabs
      */
     switchTab(tabName) {
+        console.log('🔄 Switching to tab:', tabName);
+        
         // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
+            content.style.display = 'none';
         });
 
         // Remove active class from all tabs
@@ -226,33 +229,64 @@ const UI = {
         const content = document.getElementById(tabName);
         if (content) {
             content.classList.add('active');
+            content.style.display = 'block';
+            console.log('✅ Tab content shown:', tabName);
+        } else {
+            console.error('❌ Tab content not found:', tabName);
         }
 
         // Activate selected tab
         const tab = document.querySelector(`[data-tab="${tabName}"]`);
         if (tab) {
             tab.classList.add('active');
+            console.log('✅ Tab button activated:', tabName);
+        } else {
+            console.error('❌ Tab button not found:', tabName);
         }
 
         // Store active tab in session storage
         sessionStorage.setItem('activeTab', tabName);
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
     /**
      * Initialize tab navigation
      */
     initTabs() {
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabName = e.target.getAttribute('data-tab');
-                this.switchTab(tabName);
+        console.log('🔧 Initializing tabs...');
+        
+        // Remove old listeners by cloning
+        const navTabsContainer = document.querySelector('.nav-tabs');
+        if (navTabsContainer) {
+            // Use event delegation for better reliability
+            navTabsContainer.addEventListener('click', (e) => {
+                const tab = e.target.closest('.nav-tab');
+                if (tab) {
+                    const tabName = tab.getAttribute('data-tab');
+                    if (tabName) {
+                        console.log('📍 Tab clicked:', tabName);
+                        this.switchTab(tabName);
+                    }
+                }
             });
+            console.log('✅ Tab click handler attached');
+        }
+
+        // Also add individual listeners as backup
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.style.cursor = 'pointer';
+            tab.style.pointerEvents = 'auto';
         });
 
-        // Restore last active tab
+        // Restore last active tab or default to quickStart
         const lastTab = sessionStorage.getItem('activeTab');
-        if (lastTab) {
+        if (lastTab && document.getElementById(lastTab)) {
             this.switchTab(lastTab);
+        } else {
+            // Ensure quickStart is active by default
+            this.switchTab('quickStart');
         }
     },
 
@@ -295,10 +329,16 @@ const UI = {
      * Close modal
      */
     closeModal() {
-        const modal = document.getElementById('modalOverlay');
-        if (modal) {
-            modal.remove();
-        }
+        console.log('🚪 Closing modal...');
+        const modals = document.querySelectorAll('.modal-overlay, #modalOverlay');
+        modals.forEach(modal => {
+            if (modal && modal.parentNode) {
+                modal.remove();
+            }
+        });
+        // Ensure body scrolling is re-enabled
+        document.body.style.overflow = 'auto';
+        console.log('✅ Modal closed');
     },
 
     /**
