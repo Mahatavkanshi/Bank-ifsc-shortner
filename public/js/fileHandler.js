@@ -177,7 +177,7 @@ const FileHandler = {
 
                 // Show completion modal with option to go to dashboard
                 this.showProcessingCompleteModal(result);
-                
+
                 // Auto-load dashboard data in background
                 setTimeout(() => {
                     Dashboard.loadDashboard();
