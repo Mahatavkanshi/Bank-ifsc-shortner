@@ -36,6 +36,40 @@ function readBankFile(filePath) {
     });
 }
 
+function extractMicrIfsc(fields) {
+    // Prefer ID~MICR~IFSC, then MICR,IFSC, then scan by length.
+    const normalizeValue = (value) => (value || '').toString().replace(/^\uFEFF/, '').trim();
+    const normalizeMicr = (value) => normalizeValue(value).replace(/^"+|"+$/g, '').replace(/\D/g, '');
+    const normalizeIfsc = (value) => normalizeValue(value)
+        .replace(/^"+|"+$/g, '')
+        .replace(/[^A-Za-z0-9]/g, '')
+        .toUpperCase();
+    const indexPairs = [
+        [1, 2],
+        [0, 1]
+    ];
+
+    for (const [micrIndex, ifscIndex] of indexPairs) {
+        const micr = normalizeMicr(fields[micrIndex]);
+        const ifsc = normalizeIfsc(fields[ifscIndex]);
+        if (micr.length === 9 && ifsc.length === 11) {
+            return { micr, ifsc };
+        }
+    }
+
+    let micr = '';
+    let ifsc = '';
+    for (const field of fields) {
+        const micrCandidate = normalizeMicr(field);
+        const ifscCandidate = normalizeIfsc(field);
+        if (!micr && micrCandidate.length === 9) micr = micrCandidate;
+        if (!ifsc && ifscCandidate.length === 11) ifsc = ifscCandidate;
+        if (micr && ifsc) break;
+    }
+
+    return { micr, ifsc };
+}
+
 /**
  * Load bank mapping file from various formats
  * @param {string} filePath - Path to bank mapping file
@@ -95,13 +129,28 @@ function filterCsvFile(filePath) {
             crlfDelay: Infinity
         });
 
+        let delimiter = null;
+
         rl.on('line', (line) => {
             if (!line.trim()) return;
+            
+            // Auto-detect delimiter from first line
+            if (delimiter === null) {
+                if (line.includes('~')) {
+                    delimiter = '~';
+                    console.log('📌 Detected delimiter: ~ (tilde)');
+                } else if (line.includes(',')) {
+                    delimiter = ',';
+                    console.log('📌 Detected delimiter: , (comma)');
+                } else {
+                    delimiter = ','; // default
+                }
+            }
+            
             totalRecords++;
 
-            const fields = line.split(',');
-            const micr = (fields[0] || '').trim();
-            const ifsc = (fields[1] || '').trim();
+            const fields = line.split(delimiter);
+            const { micr, ifsc } = extractMicrIfsc(fields);
 
             if (/^.{9}$/.test(micr) && /^.{11}$/.test(ifsc)) {
                 correctRecords++;
@@ -145,15 +194,17 @@ function filterArrayData(records) {
     const validStream = fs.createWriteStream(validRecordsFile);
 
     records.forEach((row) => {
-        const micr = (row[0] || '').toString().trim();
-        const ifsc = (row[1] || '').toString().trim();
+        // For format: [ID, MICR, IFSC, BANK_NAME, ...]
+        // row[0] = ID, row[1] = MICR (9 chars), row[2] = IFSC (11 chars)
+        const micr = (row[1] || '').toString().trim();
+        const ifsc = (row[2] || '').toString().trim();
 
         if (/^.{9}$/.test(micr) && /^.{11}$/.test(ifsc)) {
             correctRecords++;
-            validStream.write(row.join(',') + '\n');
+            validStream.write(row.join('~') + '\n');
         } else {
             incorrectRecords++;
-            invalidStream.write(row.join(',') + '\n');
+            invalidStream.write(row.join('~') + '\n');
         }
     });
 
@@ -233,9 +284,10 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
             if (!line.trim()) return;
             totalLinesRead++;
 
-            const f = line.split(',');
-            const micr = (f[0] || '').trim();
-            const ifsc = (f[1] || '').trim();
+            // Auto-detect delimiter
+            const delimiter = line.includes('~') ? '~' : ',';
+            const f = line.split(delimiter);
+            const { micr, ifsc } = extractMicrIfsc(f);
 
             const ifscExists = ifscSet.has(ifsc);
             const micrExists = micrSet.has(micr);
@@ -346,8 +398,12 @@ function sortByIfsc(inputFile, outputFile) {
 
         rl.on('line', (line) => {
             if (!line.trim()) return;
-            const fields = line.split(',');
-            const ifsc = (fields[1] || '').trim(); // IFSC is 2nd column (index 1)
+            // Auto-detect delimiter
+            const delimiter = line.includes('~') ? '~' : ',';
+            const fields = line.split(delimiter);
+            // For format: ID~MICR~IFSC~BANK_NAME~...
+            // fields[2] is IFSC
+            const ifsc = (fields[2] || '').trim();
             rows.push({ ifsc, line });
         });
 
@@ -659,13 +715,17 @@ function applyFuzzyMatchingToBankNames(sortedFile) {
 
         rl.on('line', (line) => {
             if (!line.trim()) return;
-            const fields = line.split(',');
+            // Auto-detect delimiter
+            const delimiter = line.includes('~') ? '~' : ',';
+            const fields = line.split(delimiter);
 
-            const micr = (fields[0] || '').trim();
-            const ifsc = (fields[1] || '').trim();
-            const bankName = (fields[2] || '').trim();
-            const micrLen = (fields[3] || '').trim();
-            const ifscLen = (fields[4] || '').trim();
+            // For format: ID~MICR~IFSC~BANK_NAME~ADDRESS~...
+            // fields[0] = ID, fields[1] = MICR, fields[2] = IFSC, fields[3] = BANK_NAME
+            const micr = (fields[1] || '').trim();
+            const ifsc = (fields[2] || '').trim();
+            const bankName = (fields[3] || '').trim();
+            const micrLen = micr.length;
+            const ifscLen = ifsc.length;
 
             rows.push({ micr, ifsc, bankName, micrLen, ifscLen, originalLine: line });
         });

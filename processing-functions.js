@@ -30,6 +30,40 @@ function readBankFile(filePath) {
     });
 }
 
+function extractMicrIfsc(fields) {
+    // Prefer ID~MICR~IFSC, then MICR,IFSC, then scan by length.
+    const normalizeValue = (value) => (value || '').toString().replace(/^\uFEFF/, '').trim();
+    const normalizeMicr = (value) => normalizeValue(value).replace(/^"+|"+$/g, '').replace(/\D/g, '');
+    const normalizeIfsc = (value) => normalizeValue(value)
+        .replace(/^"+|"+$/g, '')
+        .replace(/[^A-Za-z0-9]/g, '')
+        .toUpperCase();
+    const indexPairs = [
+        [1, 2],
+        [0, 1]
+    ];
+
+    for (const [micrIndex, ifscIndex] of indexPairs) {
+        const micr = normalizeMicr(fields[micrIndex]);
+        const ifsc = normalizeIfsc(fields[ifscIndex]);
+        if (micr.length === 9 && ifsc.length === 11) {
+            return { micr, ifsc };
+        }
+    }
+
+    let micr = '';
+    let ifsc = '';
+    for (const field of fields) {
+        const micrCandidate = normalizeMicr(field);
+        const ifscCandidate = normalizeIfsc(field);
+        if (!micr && micrCandidate.length === 9) micr = micrCandidate;
+        if (!ifsc && ifscCandidate.length === 11) ifsc = ifscCandidate;
+        if (micr && ifsc) break;
+    }
+
+    return { micr, ifsc };
+}
+
 /* =========================================================
    STEP 1 — FILTER CSV + SAVE VALID & INVALID
    ========================================================= */
@@ -50,13 +84,27 @@ function filterCsvFile(filePath) {
             crlfDelay: Infinity
         });
 
+        let delimiter = null;
+
         rl.on('line', (line) => {
             if (!line.trim()) return;
+
+            if (delimiter === null) {
+                if (line.includes('~')) {
+                    delimiter = '~';
+                    console.log('📌 Detected delimiter: ~ (tilde)');
+                } else if (line.includes(',')) {
+                    delimiter = ',';
+                    console.log('📌 Detected delimiter: , (comma)');
+                } else {
+                    delimiter = ',';
+                }
+            }
+
             totalRecords++;
 
-            const fields = line.split(',');
-            const micr = (fields[0] || '').trim();
-            const ifsc = (fields[1] || '').trim();
+            const fields = line.split(delimiter);
+            const { micr, ifsc } = extractMicrIfsc(fields);
 
             if (/^.{9}$/.test(micr) && /^.{11}$/.test(ifsc)) {
                 correctRecords++;
@@ -151,9 +199,11 @@ function compareIfscAndMicrWithBankMapping(validFile, bankMappingData) {
         const rl = readline.createInterface({ input: fs.createReadStream(validFile) });
 
         rl.on('line', line => {
-            const f = line.split(',');
-            const micr = (f[0] || '').trim();
-            const ifsc = (f[1] || '').trim();
+            if (!line.trim()) return;
+
+            const delimiter = line.includes('~') ? '~' : ',';
+            const f = line.split(delimiter);
+            const { micr, ifsc } = extractMicrIfsc(f);
 
             const ifscExists = ifscSet.has(ifsc);
             const micrExists = micrSet.has(micr);

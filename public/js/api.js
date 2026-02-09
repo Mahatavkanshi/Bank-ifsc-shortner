@@ -5,6 +5,19 @@
 const API = {
     baseURL: 'http://localhost:3000/api',
 
+    headerlessFiles: new Set([
+        'valid_records.csv',
+        'invalid_records.csv',
+        'ifsc_matched.csv',
+        'ifsc_unmatched.csv',
+        'micr_matched.csv',
+        'micr_unmatched.csv',
+        'ifsc_missing_micr_present.csv',
+        'micr_missing_ifsc_present.csv',
+        'ifsc_micr_both_unmatched.csv',
+        'ifsc_micr_both_unmatched_sorted.csv'
+    ]),
+
     /**
      * Health check endpoint
      */
@@ -150,7 +163,7 @@ const API = {
         try {
             const response = await fetch(`${this.baseURL}/download/${filename}`);
             const text = await response.text();
-            return this.parseCSV(text);
+            return this.parseCSV(text, filename);
         } catch (error) {
             console.error(`Failed to read ${filename}:`, error);
             return [];
@@ -160,31 +173,68 @@ const API = {
     /**
      * Parse CSV text into array of objects
      */
-    parseCSV(text) {
-        const lines = text.trim().split('\n');
+    parseCSV(text, filename = '') {
+        const trimmed = text.trim();
+        if (!trimmed) return [];
+
+        const lines = trimmed.split('\n').filter(line => line.trim());
         if (lines.length === 0) return [];
 
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        const data = [];
+        const firstLine = lines[0];
+        const delimiter = this.detectDelimiter(firstLine);
+        const hasHeader = this.detectHeader(filename, firstLine, delimiter);
 
-        for (let i = 1; i < lines.length; i++) {
-            const values = this.parseCSVLine(lines[i]);
-            if (values.length === headers.length) {
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index];
-                });
-                data.push(row);
+        const headerLine = hasHeader ? lines[0] : '';
+        const headers = hasHeader
+            ? this.parseCSVLine(headerLine, delimiter).map(h => h.trim().replace(/"/g, ''))
+            : this.generateHeaders(lines[0], delimiter);
+
+        const data = [];
+        const startIndex = hasHeader ? 1 : 0;
+
+        for (let i = startIndex; i < lines.length; i++) {
+            const values = this.parseCSVLine(lines[i], delimiter);
+            const row = {};
+
+            for (let colIndex = 0; colIndex < headers.length; colIndex++) {
+                row[headers[colIndex]] = values[colIndex] !== undefined ? values[colIndex] : '';
             }
+
+            data.push(row);
         }
 
         return data;
     },
 
+    detectDelimiter(line) {
+        const tildeCount = (line.match(/~/g) || []).length;
+        const commaCount = (line.match(/,/g) || []).length;
+        if (tildeCount > commaCount) return '~';
+        return ',';
+    },
+
+    detectHeader(filename, firstLine, delimiter) {
+        if (this.headerlessFiles.has(filename)) return false;
+
+        const lower = firstLine.toLowerCase();
+        if (lower.includes('ifsc') || lower.includes('micr') || lower.includes('bank')) {
+            return true;
+        }
+
+        // If the first line looks like a data row starting with a numeric id, treat as no header.
+        const firstValue = this.parseCSVLine(firstLine, delimiter)[0] || '';
+        return !/^\d+$/.test(firstValue.trim());
+    },
+
+    generateHeaders(line, delimiter) {
+        const values = this.parseCSVLine(line, delimiter);
+        return values.map((_, index) => `Column${index + 1}`);
+    },
+
     /**
      * Parse a single CSV line (handles quoted values)
      */
-    parseCSVLine(line) {
+    parseCSVLine(line, delimiter = ',') {
         const result = [];
         let current = '';
         let inQuotes = false;
@@ -193,8 +243,13 @@ const API = {
             const char = line[i];
 
             if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === delimiter && !inQuotes) {
                 result.push(current.trim());
                 current = '';
             } else {
