@@ -185,9 +185,9 @@ const API = {
         const hasHeader = this.detectHeader(filename, firstLine, delimiter);
 
         const headerLine = hasHeader ? lines[0] : '';
-        const headers = hasHeader
-            ? this.parseCSVLine(headerLine, delimiter).map(h => h.trim().replace(/"/g, ''))
-            : this.generateHeaders(lines[0], delimiter);
+        const headers = hasHeader ?
+            this.parseCSVLine(headerLine, delimiter).map(h => h.trim().replace(/"/g, '')) :
+            this.generateHeaders(lines[0], delimiter);
 
         const data = [];
         const startIndex = hasHeader ? 1 : 0;
